@@ -1,5 +1,7 @@
 const Transaction = require("../models/Transaction");
 const Item = require("../models/Item");
+const User = require("../models/User");
+const sendEmail = require("../utils/sendEmail");
 
 // ─────────────────────────────────────────
 // @route   POST /api/transactions
@@ -53,6 +55,23 @@ const createTransaction = async (req, res) => {
       startDate,
       endDate,
       message,
+    });
+
+    // ── Email: Owner ko notify karo ──
+
+    const borrower = await User.findById(req.user._id);
+    const lender = await User.findById(item.owner);
+
+    await sendEmail({
+      to: lender.email,
+      subject: "CivicSwap — Naya Borrow Request!",
+      html: `
+        <h2>Naya Borrow Request Aaya Hai!</h2>
+        <p><b>${borrower.name}</b> tumhara <b>${item.title}</b> borrow karna chahta hai.</p>
+        <p><b>Dates:</b> ${startDate} se ${endDate} tak</p>
+        <p><b>Message:</b> ${message || "Koi message nahi"}</p>
+        <p>CivicSwap pe jaake approve ya reject karo.</p>
+      `,
     });
 
     res.status(201).json(transaction);
@@ -132,6 +151,21 @@ const approveTransaction = async (req, res) => {
     // Item status update karo
     await Item.findByIdAndUpdate(transaction.item, { status: "ON_LOAN" });
 
+    // ── Email: Borrower ko notify karo ──
+    const borrowerUser = await User.findById(transaction.borrower);
+    const itemData = await Item.findById(transaction.item);
+
+    await sendEmail({
+      to: borrowerUser.email,
+      subject: "CivicSwap — Request Approve Ho Gayi!",
+      html: `
+        <h2>Borrow Request Approve Ho Gayi! 🎉</h2>
+        <p>Tumhari <b>${itemData.title}</b> ke liye request approve ho gayi!</p>
+        <p><b>Dates:</b> ${transaction.startDate.toDateString()} se ${transaction.endDate.toDateString()} tak</p>
+        <p>Owner se contact karo aur item le lo.</p>
+      `,
+    });
+
     res.json(transaction);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -162,6 +196,20 @@ const rejectTransaction = async (req, res) => {
 
     transaction.status = "REJECTED";
     await transaction.save();
+
+    // ── Email: Borrower ko notify karo ──
+    const borrowerUser = await User.findById(transaction.borrower);
+    const itemData = await Item.findById(transaction.item);
+
+    await sendEmail({
+      to: borrowerUser.email,
+      subject: "CivicSwap — Request Reject Ho Gayi",
+      html: `
+        <h2>Borrow Request Reject Ho Gayi 😔</h2>
+        <p>Tumhari <b>${itemData.title}</b> ke liye request reject ho gayi.</p>
+        <p>Koi aur item dhundo CivicSwap pe!</p>
+      `,
+    });
 
     res.json(transaction);
   } catch (error) {
@@ -202,6 +250,31 @@ const returnTransaction = async (req, res) => {
 
     // Item wapas AVAILABLE karo
     await Item.findByIdAndUpdate(transaction.item, { status: "AVAILABLE" });
+
+    // ── Email: Dono ko notify karo ──
+    const borrowerUser = await User.findById(transaction.borrower);
+    const lenderUser = await User.findById(transaction.lender);
+    const itemData = await Item.findById(transaction.item);
+
+    await sendEmail({
+      to: borrowerUser.email,
+      subject: "CivicSwap — Item Return Confirmed!",
+      html: `
+        <h2>Item Return Ho Gaya! ✅</h2>
+        <p><b>${itemData.title}</b> successfully return ho gaya.</p>
+        <p>Please <b>${lenderUser.name}</b> ko rate karo — unka feedback important hai!</p>
+      `,
+    });
+
+    await sendEmail({
+      to: lenderUser.email,
+      subject: "CivicSwap — Tumhara Item Wapas Aa Gaya!",
+      html: `
+        <h2>Item Wapas Aa Gaya! ✅</h2>
+        <p>Tumhara <b>${itemData.title}</b> wapas aa gaya.</p>
+        <p>Please <b>${borrowerUser.name}</b> ko rate karo!</p>
+      `,
+    });
 
     res.json(transaction);
   } catch (error) {

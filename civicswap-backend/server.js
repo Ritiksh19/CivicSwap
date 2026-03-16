@@ -20,6 +20,9 @@ app.use("/api/items", itemRoutes);
 const transactionRoutes = require("./routes/transactionRoutes");
 app.use("/api/transactions", transactionRoutes);
 
+const ratingRoutes = require("./routes/ratingRoutes");
+app.use("/api/ratings", ratingRoutes);
+
 // Routes (baad mein add honge)
 app.get("/", (req, res) => {
   res.json({ message: "CivicSwap API is running!" });
