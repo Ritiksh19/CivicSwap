@@ -1,75 +1,78 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from '../utils/axios';
 
 const CATEGORIES = ['Tools', 'Books', 'Kitchenware', 'Electronics', 'Sports', 'Clothing', 'Other'];
 
-const CreateItemPage = () => {
+const EditItemPage = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     category: '',
-    longitude: '',
-    latitude: '',
+    status: '',
   });
+  const [loading, setLoading] = useState(true);
+  const [saveLoading, setSaveLoading] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [locationLoading, setLocationLoading] = useState(false);
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchItem = async () => {
+      try {
+        const { data } = await axios.get(`/items/${id}`);
+        setFormData({
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          status: data.status,
+        });
+      } catch (err) {
+        setError('Item not found.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchItem();
+  }, [id]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const detectLocation = () => {
-    setLocationLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setFormData({
-          ...formData,
-          latitude: pos.coords.latitude.toFixed(6),
-          longitude: pos.coords.longitude.toFixed(6),
-        });
-        setLocationLoading(false);
-      },
-      () => {
-        setError('Location access denied.');
-        setLocationLoading(false);
-      }
-    );
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.category) return setError('Please select a category.');
-    if (!formData.latitude) return setError('Please set your location.');
-    setLoading(true);
+    setSaveLoading(true);
+    setError('');
     try {
-      await axios.post('/items', {
-        ...formData,
-        latitude: parseFloat(formData.latitude),
-        longitude: parseFloat(formData.longitude),
-      });
-      navigate('/items');
+      await axios.put(`/items/${id}`, formData);
+      navigate(`/items/${id}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create item.');
+      setError(err.response?.data?.message || 'Failed to update item.');
     } finally {
-      setLoading(false);
+      setSaveLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24 pb-16 px-6">
       <div className="max-w-2xl mx-auto">
 
-        {/* Header */}
+        <Link to={`/items/${id}`} className="text-xs text-gray-400 hover:text-black transition-colors font-medium flex items-center gap-1 mb-8">
+          ← Back to Item
+        </Link>
+
         <div className="mb-10">
-          <Link to="/items" className="text-xs text-gray-400 hover:text-black transition-colors font-medium flex items-center gap-1 mb-6">
-            ← Back to Items
-          </Link>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">New Listing</p>
-          <h1 className="text-4xl font-extrabold text-black tracking-tight">Post an Item</h1>
-          <p className="text-gray-400 mt-2 text-sm">Share something with your neighborhood community</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Edit Listing</p>
+          <h1 className="text-4xl font-extrabold text-black tracking-tight">Update Item</h1>
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-100 p-8">
@@ -91,7 +94,6 @@ const CreateItemPage = () => {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                placeholder="e.g. Cordless Drill, Physics Textbook"
                 required
                 className="w-full border border-gray-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-black transition-all duration-300 bg-gray-50 focus:bg-white"
               />
@@ -106,7 +108,6 @@ const CreateItemPage = () => {
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Describe the item — condition, brand, any usage notes..."
                 required
                 rows={4}
                 className="w-full border border-gray-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-black transition-all duration-300 bg-gray-50 focus:bg-white resize-none"
@@ -141,41 +142,41 @@ const CreateItemPage = () => {
               </div>
             </div>
 
-            {/* Location */}
+            {/* Status */}
             <div>
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2 block">
-                Item Location
+              <label className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3 block">
+                Status
               </label>
-              <button
-                type="button"
-                onClick={detectLocation}
-                disabled={locationLoading}
-                className={`w-full border-2 rounded-2xl px-5 py-4 text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-                  formData.latitude
-                    ? 'border-black bg-black text-white'
-                    : 'border-gray-200 text-gray-600 hover:border-black bg-gray-50'
-                }`}
-              >
-                {locationLoading ? (
-                  <><div className="w-4 h-4 border-2 border-gray-300 border-t-black rounded-full animate-spin" />Detecting...</>
-                ) : formData.latitude ? (
-                  <>✅ Location Set — {formData.latitude}, {formData.longitude}</>
-                ) : (
-                  <>📍 Use My Current Location</>
-                )}
-              </button>
+              <div className="flex gap-3">
+                {['AVAILABLE', 'UNAVAILABLE'].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, status: s })}
+                    className={`flex-1 py-3 rounded-2xl text-sm font-semibold border-2 transition-all duration-300 ${
+                      formData.status === s
+                        ? s === 'AVAILABLE'
+                          ? 'bg-green-500 text-white border-green-500'
+                          : 'bg-black text-white border-black'
+                        : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-black'
+                    }`}
+                  >
+                    {s === 'AVAILABLE' ? '✓ Available' : '✗ Unavailable'}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Submit */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={saveLoading}
               className="group w-full bg-black text-white py-4 rounded-2xl font-semibold text-sm hover:bg-gray-800 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {loading ? (
-                <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Posting...</>
+              {saveLoading ? (
+                <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Saving...</>
               ) : (
-                <>Post Item <span className="group-hover:translate-x-1 transition-transform duration-300">→</span></>
+                <>Save Changes <span className="group-hover:translate-x-1 transition-transform duration-300">→</span></>
               )}
             </button>
           </form>
@@ -185,4 +186,4 @@ const CreateItemPage = () => {
   );
 };
 
-export default CreateItemPage;
+export default EditItemPage;

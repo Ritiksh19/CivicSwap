@@ -13,6 +13,8 @@ import MapPage from "./pages/MapPage";
 import ProfilePage from "./pages/ProfilePage";
 import TransactionPage from "./pages/TransactionPage";
 import RatingPage from "./pages/RatingPage";
+import EditItemPage from './pages/EditItemPage';
+import EditProfilePage from './pages/EditProfilePage';
 
 function App() {
   return (
@@ -58,6 +60,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/items/:id/edit" element={<ProtectedRoute><EditItemPage /></ProtectedRoute>} />
+          <Route path="/profile/me/edit" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
           <Route
             path="/map"
             element={
