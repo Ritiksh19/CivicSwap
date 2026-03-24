@@ -1,10 +1,9 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "civicswap-production.up.railway.app/api",
+  baseURL: "https://civicswap-backend.up.railway.app/api",
 });
 
-// Har request mein automatically token add ho jayega
 instance.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
