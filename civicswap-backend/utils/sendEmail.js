@@ -29,5 +29,6 @@ const sendEmail = async (userEmail, subject, textContent) => {
   }
 };
 
+module.exports = sendEmail;
 // Example ki isko call kaise karna hai:
 // await sendEmail(req.body.email, "Request Sent", "Your borrow request was sent successfully!");
