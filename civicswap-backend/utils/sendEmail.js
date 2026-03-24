@@ -1,31 +1,33 @@
-const nodemailer = require("nodemailer");
+const axios = require("axios");
 
-const sendEmail = async ({ to, subject, html }) => {
+// Yeh naya function banega email bhejne ke liye
+const sendEmail = async (userEmail, subject, textContent) => {
   try {
-    const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST || "smtp-relay.brevo.com",
-      port: 465, // 587 ki jagah 465 kar do
-      secure: true, // 465 ke liye isko hamesha true rakhna hota hai
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "CivicSwap",
+          email: process.env.EMAIL_FROM, // Tumhara harshittrivedi24@gmail.com
+        },
+        to: [{ email: userEmail }],
+        subject: subject,
+        textContent: textContent,
       },
-      // Niche wali 2 lines add kar dena timeout issues fix karne ke liye
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-    });
-
-    await transporter.sendMail({
-      from: `"CivicSwap" <${process.env.EMAIL_FROM}>`,
-      to,
-      subject,
-      html,
-    });
-
-    console.log(`Email sent to ${to}`);
+      {
+        headers: {
+          accept: "application/json",
+          "api-key": process.env.BREVO_API_KEY,
+          "content-type": "application/json",
+        },
+      },
+    );
+    console.log("✅ Email sent successfully via Brevo API!");
+    return response.data;
   } catch (error) {
-    console.error("Email error:", error.message);
+    console.error("❌ Brevo API Error:", error.response?.data || error.message);
   }
 };
 
-module.exports = sendEmail;
+// Example ki isko call kaise karna hai:
+// await sendEmail(req.body.email, "Request Sent", "Your borrow request was sent successfully!");
