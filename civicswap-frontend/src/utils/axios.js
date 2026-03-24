@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "https://civicswap-backend.onrender.com/api",
+  baseURL: "http://localhost:5000/api",
 });
 
 // Har request mein automatically token add ho jayega
