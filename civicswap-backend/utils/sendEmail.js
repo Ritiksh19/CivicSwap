@@ -1,18 +1,18 @@
 const axios = require("axios");
 
-// Yeh naya function banega email bhejne ke liye
-const sendEmail = async (userEmail, subject, textContent) => {
+// Ab yeh function ek Object accept karega
+const sendEmail = async ({ to, subject, html }) => {
   try {
     const response = await axios.post(
       "https://api.brevo.com/v3/smtp/email",
       {
         sender: {
           name: "CivicSwap",
-          email: process.env.EMAIL_FROM, // Tumhara harshittrivedi24@gmail.com
+          email: process.env.EMAIL_FROM,
         },
-        to: [{ email: userEmail }],
+        to: [{ email: to }], // Yahan sahi email string jayegi
         subject: subject,
-        textContent: textContent,
+        htmlContent: html, // Yahan tera HTML render hoga
       },
       {
         headers: {
@@ -30,5 +30,3 @@ const sendEmail = async (userEmail, subject, textContent) => {
 };
 
 module.exports = sendEmail;
-// Example ki isko call kaise karna hai:
-// await sendEmail(req.body.email, "Request Sent", "Your borrow request was sent successfully!");
