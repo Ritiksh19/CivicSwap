@@ -109,9 +109,10 @@ const updateProfile = async (req, res) => {
     }
 
     // Password change
-    if (req.body.password) {
-      user.password = req.body.password;
-    }
+    // Password change — sirf tab jab explicitly bheja ho aur empty na ho
+if (req.body.password && req.body.password.trim() !== '') {
+  user.password = req.body.password;
+}
 
     const updatedUser = await user.save();
 
