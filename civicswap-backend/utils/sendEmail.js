@@ -1,27 +1,31 @@
-const nodemailer = require("nodemailer");
+const axios = require("axios");
 
+// Ab yeh function ek Object accept karega
 const sendEmail = async ({ to, subject, html }) => {
   try {
-    const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "CivicSwap",
+          email: process.env.EMAIL_FROM,
+        },
+        to: [{ email: to }], // Yahan sahi email string jayegi
+        subject: subject,
+        htmlContent: html, // Yahan tera HTML render hoga
       },
-    });
-
-    await transporter.sendMail({
-      from: `"CivicSwap" <${process.env.EMAIL_FROM}>`,
-      to,
-      subject,
-      html,
-    });
-
-    console.log(`Email sent to ${to}`);
+      {
+        headers: {
+          accept: "application/json",
+          "api-key": process.env.BREVO_API_KEY,
+          "content-type": "application/json",
+        },
+      },
+    );
+    console.log("✅ Email sent successfully via Brevo API!");
+    return response.data;
   } catch (error) {
-    console.error("Email error:", error.message);
+    console.error("❌ Brevo API Error:", error.response?.data || error.message);
   }
 };
 
