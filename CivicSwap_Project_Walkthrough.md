@@ -5,16 +5,12 @@
 
 ---
 
-| Field             | Details                                                     |
-| ----------------- | ----------------------------------------------------------- |
-| **Developer**     | Harshit Trivedi                                             |
-| **Student**       | Ritik Sharma — Roll No. 2100050060050                       |
-| **Institution**   | Raja Balwant Singh Management Technical Campus, Agra        |
-| **University**    | Dr. A.P.J. Abdul Kalam Technical University (AKTU), Lucknow |
-| **Program**       | MCA (Integrated) Industrial Project                         |
-| **Academic Year** | 2025–2026                                                   |
-| **Frontend**      | https://civicswap-frontend.vercel.app                       |
-| **Backend**       | https://civicswap-backend.up.railway.app                    |
+| Field         | Details                                  |
+| ------------- | ---------------------------------------- |
+| **Developer** | Harshit Trivedi                          |
+| **Developer** | Ritik Sharma                             |
+| **Frontend**  | https://civicswap-frontend.vercel.app    |
+| **Backend**   | https://civicswap-backend.up.railway.app |
 
 ---
 
