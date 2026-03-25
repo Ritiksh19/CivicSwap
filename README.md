@@ -23,15 +23,6 @@ CivicSwap addresses a common urban coordination failure: households collectively
 
 CivicSwap transforms idle household resources into shared community capital by connecting neighbors through a structured, trustworthy platform anchored to real geographic locations.
 
-**Academic Context:**
-
-- **Institution:** Raja Balwant Singh Management Technical Campus, Agra
-- **Affiliated to:** Dr. A.P.J. Abdul Kalam Technical University (AKTU), Lucknow
-- **Department:** Computer Applications — MCA (Integrated) Industrial Project
-- **Academic Year:** 2025–2026
-- **Author:** Ritik Sharma (Roll No.: 2100050060050)
-- **Guide:** Ms. Suprabha Sharma
-
 ---
 
 ## 🌐 Live Demo
