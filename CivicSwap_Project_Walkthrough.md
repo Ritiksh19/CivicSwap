@@ -5,16 +5,16 @@
 
 ---
 
-| Field | Details |
-|---|---|
-| **Developer** | Harshit Trivedi |
-| **Student** | Ritik Sharma — Roll No. 2100050060050 |
-| **Institution** | Raja Balwant Singh Management Technical Campus, Agra |
-| **University** | Dr. A.P.J. Abdul Kalam Technical University (AKTU), Lucknow |
-| **Program** | MCA (Integrated) Industrial Project |
-| **Academic Year** | 2025–2026 |
-| **Frontend** | https://civicswap-frontend.vercel.app |
-| **Backend** | https://civicswap-backend.up.railway.app |
+| Field             | Details                                                     |
+| ----------------- | ----------------------------------------------------------- |
+| **Developer**     | Harshit Trivedi                                             |
+| **Student**       | Ritik Sharma — Roll No. 2100050060050                       |
+| **Institution**   | Raja Balwant Singh Management Technical Campus, Agra        |
+| **University**    | Dr. A.P.J. Abdul Kalam Technical University (AKTU), Lucknow |
+| **Program**       | MCA (Integrated) Industrial Project                         |
+| **Academic Year** | 2025–2026                                                   |
+| **Frontend**      | https://civicswap-frontend.vercel.app                       |
+| **Backend**       | https://civicswap-backend.up.railway.app                    |
 
 ---
 
@@ -78,17 +78,17 @@ The platform is built on the principle that most households own items that remai
 
 ### Technology Decisions
 
-| Layer | Technology | Reason |
-|---|---|---|
-| Frontend Framework | React 18 + Vite | Fast HMR, component-based architecture |
-| Styling | Tailwind CSS (CDN) | Rapid UI development, responsive utilities |
-| Map | Leaflet.js + React-Leaflet | Open source, lightweight, no API key needed |
-| Backend | Node.js + Express | JavaScript full-stack, fast REST APIs |
-| Database | MongoDB + Mongoose | Flexible schema, native geospatial support |
-| Authentication | JWT + bcryptjs | Stateless, scalable, secure |
-| Email | Brevo REST API | SMTP ports blocked on cloud — REST API on port 443 works everywhere |
-| Frontend Hosting | Vercel | Zero-config React deployment, instant CDN |
-| Backend Hosting | Railway | No cold starts, reliable free tier |
+| Layer              | Technology                 | Reason                                                              |
+| ------------------ | -------------------------- | ------------------------------------------------------------------- |
+| Frontend Framework | React 18 + Vite            | Fast HMR, component-based architecture                              |
+| Styling            | Tailwind CSS (CDN)         | Rapid UI development, responsive utilities                          |
+| Map                | Leaflet.js + React-Leaflet | Open source, lightweight, no API key needed                         |
+| Backend            | Node.js + Express          | JavaScript full-stack, fast REST APIs                               |
+| Database           | MongoDB + Mongoose         | Flexible schema, native geospatial support                          |
+| Authentication     | JWT + bcryptjs             | Stateless, scalable, secure                                         |
+| Email              | Brevo REST API             | SMTP ports blocked on cloud — REST API on port 443 works everywhere |
+| Frontend Hosting   | Vercel                     | Zero-config React deployment, instant CDN                           |
+| Backend Hosting    | Railway                    | No cold starts, reliable free tier                                  |
 
 ---
 
@@ -169,6 +169,7 @@ CivicSwap/
 ### 4.1 Database Models
 
 #### User Model
+
 ```javascript
 {
   name: String,
@@ -182,11 +183,13 @@ CivicSwap/
   phone: String
 }
 ```
+
 - `2dsphere` index on `location` for geospatial queries
 - Pre-save hook hashes password using bcryptjs (10 salt rounds)
 - `matchPassword()` instance method for login verification
 
 #### Item Model
+
 ```javascript
 {
   owner: ObjectId (ref: User),
@@ -198,13 +201,16 @@ CivicSwap/
   location: { type: 'Point', coordinates: [lng, lat] }
 }
 ```
+
 - `2dsphere` index enables `$nearSphere` distance queries
 
 #### Transaction Model — 6-State Lifecycle
+
 ```
 PENDING → APPROVED → ON_LOAN → RETURNED → CLOSED
        ↘ REJECTED
 ```
+
 ```javascript
 {
   item: ObjectId (ref: Item),
@@ -221,6 +227,7 @@ PENDING → APPROVED → ON_LOAN → RETURNED → CLOSED
 ```
 
 #### Rating Model
+
 ```javascript
 {
   transaction: ObjectId (ref: Transaction),
@@ -230,6 +237,7 @@ PENDING → APPROVED → ON_LOAN → RETURNED → CLOSED
   feedback: String
 }
 ```
+
 - Unique compound index on `{ transaction, rater }` — prevents duplicate ratings
 
 ---
@@ -264,13 +272,18 @@ Prevents double-booking of items on conflicting dates:
 ```javascript
 const overlap = await Transaction.findOne({
   item: itemId,
-  status: 'APPROVED',
-  $or: [{
-    startDate: { $lte: new Date(endDate) },
-    endDate: { $gte: new Date(startDate) }
-  }]
+  status: "APPROVED",
+  $or: [
+    {
+      startDate: { $lte: new Date(endDate) },
+      endDate: { $gte: new Date(startDate) },
+    },
+  ],
 });
-if (overlap) return res.status(400).json({ message: 'Item already booked for these dates' });
+if (overlap)
+  return res
+    .status(400)
+    .json({ message: "Item already booked for these dates" });
 ```
 
 ### 4.5 Reputation Score Calculation
@@ -284,7 +297,7 @@ const avgScore = totalStars / allRatings.length;
 
 await User.findByIdAndUpdate(rateeId, {
   reputationScore: Math.round(avgScore * 10) / 10,
-  totalRatings: allRatings.length
+  totalRatings: allRatings.length,
 });
 ```
 
@@ -298,9 +311,9 @@ Global JWT and user state management using React Context API:
 
 ```javascript
 const login = async (email, password) => {
-  const { data } = await axios.post('/auth/login', { email, password });
-  localStorage.setItem('token', data.token);
-  localStorage.setItem('user', JSON.stringify(data));
+  const { data } = await axios.post("/auth/login", { email, password });
+  localStorage.setItem("token", data.token);
+  localStorage.setItem("user", JSON.stringify(data));
   setUser(data);
 };
 ```
@@ -311,7 +324,7 @@ Auto-injects JWT token on every API request:
 
 ```javascript
 instance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -321,25 +334,26 @@ instance.interceptors.request.use((config) => {
 
 ### 5.3 Pages Built
 
-| Page | Route | Access | Key Features |
-|---|---|---|---|
-| Home | `/` | Public | Parallax hero, stats, features, CTA |
-| Login | `/login` | Public | Split layout, show/hide password |
-| Register | `/register` | Public | Browser Geolocation API |
-| Dashboard | `/dashboard` | Private | Stats cards, recent activity, quick actions |
-| Item List | `/items` | Private | Search, category filter, geo-sorted grid |
-| Item Detail | `/items/:id` | Private | Borrow request form with date picker |
-| Create Item | `/items/create` | Private | Category selector, auto location detect |
-| Edit Item | `/items/:id/edit` | Private | Pre-filled form, status toggle |
-| Map | `/map` | Private | Leaflet.js map, radius slider, item pins |
-| Profile | `/profile/:id` | Private | Reputation score, items, reviews |
-| Edit Profile | `/profile/me/edit` | Private | Name, bio, password, location update |
-| Transactions | `/transactions` | Private | All activity + incoming requests tabs |
-| Rate | `/rate/:transactionId` | Private | Interactive star rating |
+| Page         | Route                  | Access  | Key Features                                |
+| ------------ | ---------------------- | ------- | ------------------------------------------- |
+| Home         | `/`                    | Public  | Parallax hero, stats, features, CTA         |
+| Login        | `/login`               | Public  | Split layout, show/hide password            |
+| Register     | `/register`            | Public  | Browser Geolocation API                     |
+| Dashboard    | `/dashboard`           | Private | Stats cards, recent activity, quick actions |
+| Item List    | `/items`               | Private | Search, category filter, geo-sorted grid    |
+| Item Detail  | `/items/:id`           | Private | Borrow request form with date picker        |
+| Create Item  | `/items/create`        | Private | Category selector, auto location detect     |
+| Edit Item    | `/items/:id/edit`      | Private | Pre-filled form, status toggle              |
+| Map          | `/map`                 | Private | Leaflet.js map, radius slider, item pins    |
+| Profile      | `/profile/:id`         | Private | Reputation score, items, reviews            |
+| Edit Profile | `/profile/me/edit`     | Private | Name, bio, password, location update        |
+| Transactions | `/transactions`        | Private | All activity + incoming requests tabs       |
+| Rate         | `/rate/:transactionId` | Private | Interactive star rating                     |
 
 ### 5.4 UI Design Philosophy
 
 Premium aesthetic inspired by Airbnb — Modern & Minimal:
+
 - Dark hero section with CSS parallax scrolling
 - Smooth hover transitions (`hover:-translate-y-1`, `hover:shadow-xl`)
 - Black and white minimal color scheme
@@ -353,13 +367,13 @@ Premium aesthetic inspired by Airbnb — Modern & Minimal:
 
 ### Email Triggers
 
-| Event | Recipient | Subject |
-|---|---|---|
-| Borrow request submitted | Item owner (lender) | New Borrow Request |
-| Request approved | Borrower | Request Approved |
-| Request rejected | Borrower | Request Rejected |
-| Item returned | Both parties | Item Returned + Rate prompt |
-| Rating submitted (both) | Both parties | Transaction Closed |
+| Event                    | Recipient           | Subject                     |
+| ------------------------ | ------------------- | --------------------------- |
+| Borrow request submitted | Item owner (lender) | New Borrow Request          |
+| Request approved         | Borrower            | Request Approved            |
+| Request rejected         | Borrower            | Request Rejected            |
+| Item returned            | Both parties        | Item Returned + Rate prompt |
+| Rating submitted (both)  | Both parties        | Transaction Closed          |
 
 ### Final Implementation — Brevo REST API
 
@@ -367,20 +381,24 @@ After multiple failed attempts with SMTP (detailed in Problems section), the fin
 
 ```javascript
 const sendEmail = async ({ to, subject, html }) => {
-  await axios.post('https://api.brevo.com/v3/smtp/email', {
-    sender: {
-      name: 'CivicSwap',
-      email: process.env.EMAIL_FROM
+  await axios.post(
+    "https://api.brevo.com/v3/smtp/email",
+    {
+      sender: {
+        name: "CivicSwap",
+        email: process.env.EMAIL_FROM,
+      },
+      to: [{ email: to }],
+      subject: subject,
+      htmlContent: html,
     },
-    to: [{ email: to }],
-    subject: subject,
-    htmlContent: html
-  }, {
-    headers: {
-      'api-key': process.env.BREVO_API_KEY,
-      'Content-Type': 'application/json'
-    }
-  });
+    {
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+    },
+  );
   console.log(`Email sent to ${to}`);
 };
 ```
@@ -393,50 +411,50 @@ All API endpoints were tested systematically using **Thunder Client** (VS Code e
 
 ### 7.1 Auth Module Testing
 
-| # | Test | Method | Endpoint | Expected | Result |
-|---|---|---|---|---|---|
-| 1 | Register new user | POST | `/api/auth/register` | 201 + JWT token | ✅ Pass |
-| 2 | Login with credentials | POST | `/api/auth/login` | 200 + JWT token | ✅ Pass |
-| 3 | Get profile with token | GET | `/api/auth/profile` | 200 + user object | ✅ Pass |
-| 4 | Update profile | PUT | `/api/auth/profile` | 200 + updated user | ✅ Pass |
-| 5 | Wrong token | GET | `/api/auth/profile` | 401 Unauthorized | ✅ Pass |
-| 6 | Missing token | GET | `/api/auth/profile` | 401 No token | ✅ Pass |
+| #   | Test                   | Method | Endpoint             | Expected           | Result  |
+| --- | ---------------------- | ------ | -------------------- | ------------------ | ------- |
+| 1   | Register new user      | POST   | `/api/auth/register` | 201 + JWT token    | ✅ Pass |
+| 2   | Login with credentials | POST   | `/api/auth/login`    | 200 + JWT token    | ✅ Pass |
+| 3   | Get profile with token | GET    | `/api/auth/profile`  | 200 + user object  | ✅ Pass |
+| 4   | Update profile         | PUT    | `/api/auth/profile`  | 200 + updated user | ✅ Pass |
+| 5   | Wrong token            | GET    | `/api/auth/profile`  | 401 Unauthorized   | ✅ Pass |
+| 6   | Missing token          | GET    | `/api/auth/profile`  | 401 No token       | ✅ Pass |
 
 ### 7.2 Items Module Testing
 
-| # | Test | Method | Endpoint | Expected | Result |
-|---|---|---|---|---|---|
-| 7 | Create item | POST | `/api/items` | 201 + item object | ✅ Pass |
-| 8 | Get all items (geo-filter) | GET | `/api/items?lat=&lng=&radius=10` | 200 + items array | ✅ Pass |
-| 9 | Get single item | GET | `/api/items/:id` | 200 + item detail | ✅ Pass |
-| 10 | Update item | PUT | `/api/items/:id` | 200 + updated item | ✅ Pass |
-| 11 | Delete item | DELETE | `/api/items/:id` | 200 + success message | ✅ Pass |
-| 12 | Unauthorized update | PUT | `/api/items/:id` | 401 Permission denied | ✅ Pass |
+| #   | Test                       | Method | Endpoint                         | Expected              | Result  |
+| --- | -------------------------- | ------ | -------------------------------- | --------------------- | ------- |
+| 7   | Create item                | POST   | `/api/items`                     | 201 + item object     | ✅ Pass |
+| 8   | Get all items (geo-filter) | GET    | `/api/items?lat=&lng=&radius=10` | 200 + items array     | ✅ Pass |
+| 9   | Get single item            | GET    | `/api/items/:id`                 | 200 + item detail     | ✅ Pass |
+| 10  | Update item                | PUT    | `/api/items/:id`                 | 200 + updated item    | ✅ Pass |
+| 11  | Delete item                | DELETE | `/api/items/:id`                 | 200 + success message | ✅ Pass |
+| 12  | Unauthorized update        | PUT    | `/api/items/:id`                 | 401 Permission denied | ✅ Pass |
 
 ### 7.3 Transaction Module Testing
 
-| # | Test | Method | Endpoint | Expected | Result |
-|---|---|---|---|---|---|
-| 13 | Create borrow request | POST | `/api/transactions` | 201 + PENDING status | ✅ Pass |
-| 14 | Borrow own item | POST | `/api/transactions` | 400 Cannot borrow own item | ✅ Pass |
-| 15 | Overlapping dates | POST | `/api/transactions` | 400 Already booked | ✅ Pass |
-| 16 | Get my transactions | GET | `/api/transactions/my` | 200 + transactions array | ✅ Pass |
-| 17 | Get incoming requests | GET | `/api/transactions/requests` | 200 + pending requests | ✅ Pass |
-| 18 | Approve request | PUT | `/api/transactions/:id/approve` | 200 + APPROVED status | ✅ Pass |
-| 19 | Reject request | PUT | `/api/transactions/:id/reject` | 200 + REJECTED status | ✅ Pass |
-| 20 | Return item | PUT | `/api/transactions/:id/return` | 200 + RETURNED status | ✅ Pass |
-| 21 | Unauthorized approve | PUT | `/api/transactions/:id/approve` | 401 Permission denied | ✅ Pass |
+| #   | Test                  | Method | Endpoint                        | Expected                   | Result  |
+| --- | --------------------- | ------ | ------------------------------- | -------------------------- | ------- |
+| 13  | Create borrow request | POST   | `/api/transactions`             | 201 + PENDING status       | ✅ Pass |
+| 14  | Borrow own item       | POST   | `/api/transactions`             | 400 Cannot borrow own item | ✅ Pass |
+| 15  | Overlapping dates     | POST   | `/api/transactions`             | 400 Already booked         | ✅ Pass |
+| 16  | Get my transactions   | GET    | `/api/transactions/my`          | 200 + transactions array   | ✅ Pass |
+| 17  | Get incoming requests | GET    | `/api/transactions/requests`    | 200 + pending requests     | ✅ Pass |
+| 18  | Approve request       | PUT    | `/api/transactions/:id/approve` | 200 + APPROVED status      | ✅ Pass |
+| 19  | Reject request        | PUT    | `/api/transactions/:id/reject`  | 200 + REJECTED status      | ✅ Pass |
+| 20  | Return item           | PUT    | `/api/transactions/:id/return`  | 200 + RETURNED status      | ✅ Pass |
+| 21  | Unauthorized approve  | PUT    | `/api/transactions/:id/approve` | 401 Permission denied      | ✅ Pass |
 
 ### 7.4 Rating Module Testing
 
-| # | Test | Method | Endpoint | Expected | Result |
-|---|---|---|---|---|---|
-| 22 | Submit rating | POST | `/api/ratings` | 201 + rating object | ✅ Pass |
-| 23 | Duplicate rating | POST | `/api/ratings` | 400 Already rated | ✅ Pass |
-| 24 | Rate before return | POST | `/api/ratings` | 400 Return item first | ✅ Pass |
-| 25 | Get user ratings | GET | `/api/ratings/user/:id` | 200 + ratings array | ✅ Pass |
-| 26 | Reputation auto-update | POST | `/api/ratings` | User score recalculated | ✅ Pass |
-| 27 | Both rated → CLOSED | POST | `/api/ratings` (2nd) | Transaction status → CLOSED | ✅ Pass |
+| #   | Test                   | Method | Endpoint                | Expected                    | Result  |
+| --- | ---------------------- | ------ | ----------------------- | --------------------------- | ------- |
+| 22  | Submit rating          | POST   | `/api/ratings`          | 201 + rating object         | ✅ Pass |
+| 23  | Duplicate rating       | POST   | `/api/ratings`          | 400 Already rated           | ✅ Pass |
+| 24  | Rate before return     | POST   | `/api/ratings`          | 400 Return item first       | ✅ Pass |
+| 25  | Get user ratings       | GET    | `/api/ratings/user/:id` | 200 + ratings array         | ✅ Pass |
+| 26  | Reputation auto-update | POST   | `/api/ratings`          | User score recalculated     | ✅ Pass |
+| 27  | Both rated → CLOSED    | POST   | `/api/ratings` (2nd)    | Transaction status → CLOSED | ✅ Pass |
 
 ### 7.5 End-to-End Flow Test
 
@@ -462,12 +480,12 @@ Complete user journey tested on local environment before deployment:
 
 ### 7.6 Email Notification Testing
 
-| Trigger | Email Received | Spam Check | Result |
-|---|---|---|---|
-| Borrow request submitted | Owner inbox | Checked | ✅ Pass |
-| Request approved | Borrower inbox | Checked | ✅ Pass |
-| Request rejected | Borrower inbox | Checked | ✅ Pass |
-| Item returned | Both inboxes | Checked | ✅ Pass |
+| Trigger                  | Email Received | Spam Check | Result  |
+| ------------------------ | -------------- | ---------- | ------- |
+| Borrow request submitted | Owner inbox    | Checked    | ✅ Pass |
+| Request approved         | Borrower inbox | Checked    | ✅ Pass |
+| Request rejected         | Borrower inbox | Checked    | ✅ Pass |
+| Item returned            | Both inboxes   | Checked    | ✅ Pass |
 
 ---
 
@@ -487,6 +505,7 @@ Complete user journey tested on local environment before deployment:
 - No cold start issues — persistent server unlike Render free tier
 
 **Environment Variables on Railway:**
+
 ```
 PORT            = 5000
 MONGO_URI       = mongodb+srv://...
@@ -509,6 +528,7 @@ vercel --prod
 ```
 
 **`vercel.json`** — Required for React SPA routing:
+
 ```json
 {
   "rewrites": [
@@ -525,13 +545,12 @@ vercel --prod
 Backend configured to accept requests from Vercel frontend:
 
 ```javascript
-app.use(cors({
-  origin: [
-    'https://civicswap-frontend.vercel.app',
-    'http://localhost:5173'
-  ],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: ["https://civicswap-frontend.vercel.app", "http://localhost:5173"],
+    credentials: true,
+  }),
+);
 ```
 
 ---
@@ -545,15 +564,16 @@ app.use(cors({
 **Root Cause:** Arrow function used in Mongoose pre-save hook — `this` keyword is not available in arrow functions
 
 **Solution:**
+
 ```javascript
 // ❌ Wrong
-userSchema.pre('save', async (next) => {
+userSchema.pre("save", async (next) => {
   this.password = await bcrypt.hash(this.password, 10); // 'this' is undefined
 });
 
 // ✅ Correct
-userSchema.pre('save', async function() {
-  if (!this.isModified('password')) return;
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
@@ -578,8 +598,11 @@ userSchema.pre('save', async function() {
 **Root Cause:** `#root` div was not inheriting full viewport width
 
 **Solution:**
+
 ```css
-html, body, #root {
+html,
+body,
+#root {
   width: 100%;
   min-height: 100vh;
 }
@@ -616,8 +639,8 @@ html, body, #root {
 **Solution:** Completely bypassed SMTP. Switched to **Brevo REST API** using Axios over HTTPS (port 443) — cloud platforms never block port 443
 
 ```javascript
-await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
-  headers: { 'api-key': process.env.BREVO_API_KEY }
+await axios.post("https://api.brevo.com/v3/smtp/email", payload, {
+  headers: { "api-key": process.env.BREVO_API_KEY },
 });
 ```
 
@@ -628,13 +651,16 @@ await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
 **Symptom:** Server crashed with `sendEmail is not a function` on transaction routes
 
 **Root Cause:**
+
 1. `axios` package was not installed in the backend directory
 2. `module.exports` was missing from the new `sendEmail.js` utility
 
 **Solution:**
+
 ```bash
 npm install axios
 ```
+
 ```javascript
 module.exports = sendEmail; // Added at bottom of sendEmail.js
 ```
@@ -648,12 +674,13 @@ module.exports = sendEmail; // Added at bottom of sendEmail.js
 **Root Cause:** Function signature mismatch — controller passed a destructured object but utility expected positional arguments
 
 **Solution:** Standardized function signature to destructured object:
+
 ```javascript
 const sendEmail = async ({ to, subject, html }) => {
-  await axios.post('https://api.brevo.com/v3/smtp/email', {
-    to: [{ email: to }],   // Brevo expects array of objects
+  await axios.post("https://api.brevo.com/v3/smtp/email", {
+    to: [{ email: to }], // Brevo expects array of objects
     subject,
-    htmlContent: html
+    htmlContent: html,
   });
 };
 ```
@@ -677,11 +704,10 @@ const sendEmail = async ({ to, subject, html }) => {
 **Root Cause:** Vercel serves static files and looks for a physical file matching the URL path. React SPA handles routing client-side — all traffic must go to `index.html`
 
 **Solution:** Added `vercel.json` to frontend root:
+
 ```json
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
 ```
 
@@ -694,11 +720,16 @@ const sendEmail = async ({ to, subject, html }) => {
 **Root Cause:** Render free plan spins down servers after 15 minutes of inactivity
 
 **Solution:** Implemented `keepAlive.js` — pings the health endpoint every 14 minutes:
+
 ```javascript
-setInterval(() => {
-  https.get('https://civicswap-backend.onrender.com/api/health');
-}, 14 * 60 * 1000);
+setInterval(
+  () => {
+    https.get("https://civicswap-backend.onrender.com/api/health");
+  },
+  14 * 60 * 1000,
+);
 ```
+
 Also migrated to **Railway** which has no cold start on its free tier.
 
 ---
@@ -717,48 +748,48 @@ Also migrated to **Railway** which has no cold start on its free tier.
 
 ### Auth Endpoints
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `POST` | `/api/auth/register` | Public | Register new user with location |
-| `POST` | `/api/auth/login` | Public | Login, returns JWT token |
-| `GET` | `/api/auth/profile` | Private | Get logged-in user profile |
-| `PUT` | `/api/auth/profile` | Private | Update name, bio, password, location |
+| Method | Endpoint             | Access  | Description                          |
+| ------ | -------------------- | ------- | ------------------------------------ |
+| `POST` | `/api/auth/register` | Public  | Register new user with location      |
+| `POST` | `/api/auth/login`    | Public  | Login, returns JWT token             |
+| `GET`  | `/api/auth/profile`  | Private | Get logged-in user profile           |
+| `PUT`  | `/api/auth/profile`  | Private | Update name, bio, password, location |
 
 ### Item Endpoints
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/items` | Private | Get items (supports geo-filter via query params) |
-| `POST` | `/api/items` | Private | Create new item listing |
-| `GET` | `/api/items/:id` | Private | Get single item with owner details |
-| `PUT` | `/api/items/:id` | Private | Update item (owner only) |
-| `DELETE` | `/api/items/:id` | Private | Delete item (owner only) |
+| Method   | Endpoint         | Access  | Description                                      |
+| -------- | ---------------- | ------- | ------------------------------------------------ |
+| `GET`    | `/api/items`     | Private | Get items (supports geo-filter via query params) |
+| `POST`   | `/api/items`     | Private | Create new item listing                          |
+| `GET`    | `/api/items/:id` | Private | Get single item with owner details               |
+| `PUT`    | `/api/items/:id` | Private | Update item (owner only)                         |
+| `DELETE` | `/api/items/:id` | Private | Delete item (owner only)                         |
 
 **Geo-filter query params:** `?latitude=28.59&longitude=78.55&radius=5&category=Tools&search=drill`
 
 ### Transaction Endpoints
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `POST` | `/api/transactions` | Private | Create borrow request |
-| `GET` | `/api/transactions/my` | Private | Get all my transactions |
-| `GET` | `/api/transactions/requests` | Private | Get incoming PENDING requests |
-| `PUT` | `/api/transactions/:id/approve` | Private | Approve request (lender only) |
-| `PUT` | `/api/transactions/:id/reject` | Private | Reject request (lender only) |
-| `PUT` | `/api/transactions/:id/return` | Private | Mark as returned |
+| Method | Endpoint                        | Access  | Description                   |
+| ------ | ------------------------------- | ------- | ----------------------------- |
+| `POST` | `/api/transactions`             | Private | Create borrow request         |
+| `GET`  | `/api/transactions/my`          | Private | Get all my transactions       |
+| `GET`  | `/api/transactions/requests`    | Private | Get incoming PENDING requests |
+| `PUT`  | `/api/transactions/:id/approve` | Private | Approve request (lender only) |
+| `PUT`  | `/api/transactions/:id/reject`  | Private | Reject request (lender only)  |
+| `PUT`  | `/api/transactions/:id/return`  | Private | Mark as returned              |
 
 ### Rating Endpoints
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `POST` | `/api/ratings` | Private | Submit rating after return |
-| `GET` | `/api/ratings/user/:id` | Private | Get all ratings for a user |
+| Method | Endpoint                | Access  | Description                |
+| ------ | ----------------------- | ------- | -------------------------- |
+| `POST` | `/api/ratings`          | Private | Submit rating after return |
+| `GET`  | `/api/ratings/user/:id` | Private | Get all ratings for a user |
 
 ### Health Check
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/health` | Public | Server health check for keepAlive ping |
+| Method | Endpoint      | Access | Description                            |
+| ------ | ------------- | ------ | -------------------------------------- |
+| `GET`  | `/api/health` | Public | Server health check for keepAlive ping |
 
 ---
 
@@ -788,13 +819,13 @@ Also migrated to **Railway** which has no cold start on its free tier.
 
 ## Live URLs
 
-| Service | URL |
-|---|---|
-| **Frontend** | https://civicswap-frontend.vercel.app |
-| **Backend API** | https://civicswap-backend.up.railway.app/api |
+| Service          | URL                                                 |
+| ---------------- | --------------------------------------------------- |
+| **Frontend**     | https://civicswap-frontend.vercel.app               |
+| **Backend API**  | https://civicswap-backend.up.railway.app/api        |
 | **Health Check** | https://civicswap-backend.up.railway.app/api/health |
 
 ---
 
-*CivicSwap — Built with ❤️ for communities*
-*Harshit Trivedi · Ritik Sharma · RBSMTC Agra · AKTU · 2025–2026*
+_CivicSwap — Built with ❤️ for communities_
+_Harshit Trivedi · Ritik Sharma_
